@@ -1,0 +1,17 @@
+int main()
+{
+    ll a, b;
+    cin >> a >> b;
+    ll temp = max(a, b) - min(a, b);
+    if (min(a, b) == (ll)(1.0 * temp * (sqrt(5) + 1) / 2))
+        cout << 0 << endl;
+    else
+        cout << 1 << endl;
+    return 0;
+}
+
+/*
+阶梯nim是指，有n堆石子，每次我们可以从第i堆的石子中拿走一部分放到第i-1堆中，
+或者把第1堆中的石子拿走一部分，无法操作的人算输。
+先说结论：阶梯nim的游戏结果与只看奇数堆的石子数的普通nim结果相同。
+*/

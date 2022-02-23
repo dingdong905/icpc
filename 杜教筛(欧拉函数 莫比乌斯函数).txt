@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+#include<unordered_map>
+using namespace std;
+typedef long long ll;
+const ll MAXN = 1e6 + 5;
+bool vis[MAXN];
+/*
+    mu[]  _mu[]  getmu()  求莫比乌斯函数前缀和
+    phi[]  _phi[]  getphi()  求欧拉函数的前缀和
+*/
+ll mu[MAXN], phi[MAXN], prime[MAXN], cnt;
+unordered_map<ll, ll>_mu;
+unordered_map<ll, ll>_phi;
+void Euler_Prime(ll n) {
+	mu[1] = 1, phi[1] = 1, vis[1] = true;
+	for (ll i = 2; i <= n; i++) {
+		if (!vis[i]) {
+			prime[++cnt] = i;
+			mu[i] = -1;
+			phi[i] = i - 1;
+		}
+		for (ll j = 1; j <= cnt && i * prime[j] <= n; j++) {
+			vis[i * prime[j]] = true;
+			if (i % prime[j] == 0) {
+				mu[i * prime[j]] = 0;
+				phi[i * prime[j]] = phi[i] * prime[j];
+				break;
+			}
+			mu[i * prime[j]] = -mu[i];
+			phi[i * prime[j]] = phi[i] * (prime[j] - 1);
+		}
+	}
+	for (ll i = 1; i <= n; i++) {
+		mu[i] += mu[i - 1];
+		phi[i] += phi[i - 1];
+	}
+}
+
+ll getmu(ll x) {
+	if (x <= 1000000)
+		return mu[x];
+	else if (_mu[x])
+		return _mu[x];
+	ll ans = 1;
+	for (ll l = 2, r = 0; l <= x; l = r + 1) {
+		r = x / (x / l);
+		ans -= (r - l + 1) * getmu(x / l);
+	}
+	return _mu[x] = ans;
+}
+
+ll getphi(ll x) {
+	if (x <= 1000000)
+		return phi[x];
+	else if (_phi[x])
+		return _phi[x];
+	ll ans = x * (x + 1) / 2;
+	for (ll l = 2, r = 0; l <= x; l = r + 1) {
+		r = x / (x / l);
+		ans -= (r - l + 1) * getphi(x / l);
+	}
+	return _phi[x] = ans;
+}
+
+
+int main() {
+	Euler_Prime(1000000);
+	ll T;
+	scanf("%lld", &T);
+	while (T--) {
+		ll n;
+		scanf("%lld", &n);
+		printf("%lld %lld\n", getphi(n), getmu(n));
+	}
+	return 0;
+}

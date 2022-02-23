@@ -1,0 +1,9 @@
+const ll mod = 1e9 + 7;
+const int SIZE = 1e6 + 5;
+ll inv[SIZE];
+void getinv()
+{
+    inv[1] = 1;
+    for (int i = 2; i < 1e6; i++)
+        inv[i] = ll(mod - mod / i) * inv[mod % i] % mod;
+}

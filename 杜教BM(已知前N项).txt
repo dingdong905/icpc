@@ -1,0 +1,123 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll mod = 1000000007;
+
+ll qpow(ll n, ll m)
+{
+    n %= mod;
+    ll ans = 1;
+    for (; m; m >>= 1){
+        if (m & 1)
+            ans = ans * n % mod;
+        n = n * n % mod;
+    }
+    return ans;
+}
+struct linear_seq
+{
+    static const int MAX = 10005;
+    ll res[MAX], base[MAX], cao[MAX], nmd[MAX];
+    vector<ll> Md;
+    void mul(ll a[], ll b[], ll k)
+    {
+        for (ll i = 0; i < k + k; i++)
+            cao[i] = 0;
+        for (ll i = 0; i < k; i++)
+            if (a[i])
+                for (ll j = 0; j < k; j++)
+                    cao[i + j] = (cao[i + j] + a[i] * b[j]) % mod;
+
+        for (ll i = k + k - 1; i >= k; i--)
+            if (cao[i])
+                for (int j = 0; j < Md.size(); j++)
+                    cao[i - k + Md[j]] = (cao[i - k + Md[j]] - cao[i] * nmd[Md[j]]) % mod;
+        for (ll i = 0; i < k; i++)
+            a[i] = cao[i];
+    }
+    ll solve(ll n, vector<ll> a, vector<ll> b){
+        ll ans = 0, pnt = 0;
+        ll k = a.size();
+        for (ll i = 0; i < k; i++){
+            nmd[k - 1 - i] = -a[i];
+            nmd[k] = 1;
+        }
+        Md.clear();
+        for (ll i = 0; i < k; i++)
+            if (nmd[i] != 0)
+                Md.push_back(i);
+        for (ll i = 0; i < k; i++)
+            res[i] = base[i] = 0;
+        res[0] = 1;
+        while ((1ll << pnt) <= n)
+            pnt++;
+        for (ll p = pnt; p >= 0; p--){
+            mul(res, res, k);
+            if ((n >> p) & 1){
+                for (ll i = k - 1; i >= 0; i--)
+                    res[i + 1] = res[i];
+                res[0] = 0;
+                for (ll j = 0; j < Md.size(); j++)
+                    res[Md[j]] = (res[Md[j]] - res[k] * nmd[Md[j]]) % mod;
+            }
+        }
+        for (ll i = 0; i < k; i++)
+            ans = (ans + res[i] * b[i]) % mod;
+        if (ans < 0)
+            ans += mod;
+        return ans;
+    }
+    vector<ll> yuchuli(vector<ll> s){
+        vector<ll> C(1, 1), B(1, 1);
+        ll L = 0, m = 1, b = 1;
+        for (ll n = 0; n < s.size(); n++){
+            ll d = 0;
+            for (ll i = 0; i <= L; i++)
+                d = (d + (ll)C[i] * s[n - i]) % mod;
+            if (d == 0)
+                m++;
+            else if (2 * L <= n){
+                vector<ll> T = C;
+                ll c = mod - d * qpow(b, mod - 2) % mod;
+                while (C.size() < B.size() + m)
+                    C.push_back(0);
+                for (ll i = 0; i < B.size(); i++)
+                    C[i + m] = (C[i + m] + c * B[i]) % mod;
+                L = n + 1 - L;
+                B = T;
+                b = d;
+                m = 1;
+            }
+            else{
+                ll c = mod - d * qpow(b, mod - 2) % mod;
+                while (C.size() < B.size() + m)
+                    C.push_back(0);
+                for (ll i = 0; i < B.size(); i++)
+                    C[i + m] = (C[i + m] + c * B[i]) % mod;
+                m++;
+            }
+        }
+        return C;
+    }
+    ll getseq(vector<ll> a, ll n){
+        vector<ll> c = yuchuli(a);
+        c.erase(c.begin());
+        for (ll i = 0; i < c.size(); i++)
+            c[i] = (mod - c[i]) % mod;
+        ll ans = solve(n, c, vector<ll>(a.begin(), a.begin() + c.size()));
+        return ans;
+    }
+}seq;
+
+int main()
+{
+    ll T;
+    cin >> T;
+    while (T--)
+    {
+        ll n;
+        vector<ll>v({ 3,9,20,46,106,244,560,1286,2956,6794,15610,35866,82416,189384,435170,999936,2297686 });
+        scanf("%lld", &n);
+        printf("%lld\n", seq.getseq(v, n - 1));
+    }
+}

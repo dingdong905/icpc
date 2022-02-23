@@ -1,0 +1,34 @@
+*/
+插入与删除操作
+权值线段树的插入与删除操作与普通线段树一致，是一种单点修改操作,插入v个num元素
+*/
+inline void update(int root, int left, int right, int num, int v){
+    int lc = root << 1, rc = root << 1 | 1, mid = (left + right) >> 1;
+
+    if(left == right){
+        tree[root] += v;
+        return;
+    }
+
+    if(num <= mid)
+        update(lc, left, mid, num, v);
+    else
+        update(rc, mid+1, right, num, v);
+
+    tree[root] = tree[lc] + tree[rc];
+}
+/*
+查询第 k 大元素
+当左子树内权值大于等于剩余查询个数，则递归进入左子树进行查询，否则递归进入右子树进行查询。
+*/
+inline int queryK(int root, int left, int right, int num){
+    int lc = root << 1, rc = root << 1 | 1, mid = (left + right) >> 1;
+
+    if(left == right)
+        return left;
+
+    if(tree[lc] >= num)
+        return queryK(lc, left, mid, num);
+    else
+        return queryK(rc, mid+1, right, num - tree[lc]);
+}

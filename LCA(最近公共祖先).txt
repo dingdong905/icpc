@@ -1,0 +1,40 @@
+struct edge
+{
+	ll t, nex;
+}e[20005];  //存边
+ll head[10005], tot;
+ll depth[10005], fa[10005][22], lg[10005];
+void init(ll n)   //预处理 lgn+1
+{
+	for (ll i = 1; i <= n; ++i)
+		lg[i] = lg[i - 1] + (1 << lg[i - 1] == i);
+}
+void add(ll x, ll y)    //建边 双向
+{
+	e[++tot].t = y;
+	e[tot].nex = head[x];
+	head[x] = tot;
+}
+void dfs(ll now, ll fath)  //建树 now节点 fath 深度
+{
+	fa[now][0] = fath;
+	depth[now] = depth[fath] + 1;
+	for (ll i = 1; i <= lg[depth[now]]; ++i)
+		fa[now][i] = fa[fa[now][i - 1]][i - 1];
+	for (ll i = head[now]; i; i = e[i].nex)
+		if (e[i].t != fath)
+			dfs(e[i].t, now);
+}
+ll LCA(ll x, ll y) //x,y的最近公共祖先
+{
+	if (depth[x] < depth[y])
+		swap(x, y);
+	while (depth[x] > depth[y])
+		x = fa[x][lg[depth[x] - depth[y]] - 1];
+	if (x == y)
+		return x;
+	for (ll k = lg[depth[x]] - 1; k >= 0; --k)
+		if (fa[x][k] != fa[y][k])
+			x = fa[x][k], y = fa[y][k];
+	return fa[x][0];
+}

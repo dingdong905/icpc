@@ -1,0 +1,33 @@
+ll dp[1005];
+ll w[1005], v[1005], num[1005];//w:重量 v:价值 num:数量 // w: weight, v:value, num:number
+ll V;               //V:容量
+//01背包
+void ZeroOnePack(ll w, ll v)
+{
+	for (int j = V; j >= w; j--)
+		dp[j] = max(dp[j], dp[j - w] + v);
+}
+//完全背包
+void CompletePack(ll w, ll v)
+{
+	for (int j = w; j <= V; j++)
+		dp[j] = max(dp[j], dp[j - w] + v);
+}
+//多重背包
+void MultiplePack(ll w, ll v, ll num)
+{
+	if (w * num >= V)
+		CompletePack(w, v);
+	else{
+		int k = 1;
+		while (k < num){
+			ZeroOnePack(k * w, k * v);
+			num -= k;
+			k <<= 1;
+		}
+		ZeroOnePack(num * w, num * v);
+	}
+}
+
+for (int i = 1; i <= n; i++)
+      MultiplePack(w[i], v[i], num[i]);

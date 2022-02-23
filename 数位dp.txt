@@ -1,0 +1,35 @@
+typedef long long ll;
+const ll INF=0x3f3f3f3f3f3f3f3f;
+ll dp[20][10][10][2][2][2],num[20];
+ll dfs(ll pos,ll pre,ll ppre,bool ok,bool eight,bool four,bool lim,bool lead){
+    //debug(pos,pre,ppre,ok,eight,four,lim,lead);
+    if (pos == -1)
+        return ok&&(!eight||!four);
+    if (!lim && dp[pos][pre][ppre][ok][eight][four]!= -1)
+        return dp[pos][pre][ppre][ok][eight][four];
+    ll up = lim ? num[pos] : 9,res = 0;
+    for (ll i = 0; i <= up; i++) 
+        res += dfs(pos-1,i,pre,ok||(i==pre&&pre==ppre&&!lead),eight||(i==8),four||(i==4), lim && i == num[pos],lead&&i==0);
+    if (!lim&&!lead)
+        dp[pos][pre][ppre][ok][eight][four] = res;
+    return res;
+}
+ll solve(ll x){
+    memset(dp,-1,sizeof(dp));
+    ll len = 0;
+    while (x){
+        num[len++] = x % 10;
+        x /= 10;
+    }
+    return dfs(len-1,-1,-2,0,0,0,1,1);
+}
+int main()
+{
+    ll a,b;
+    // for(ll i=1;i<=3000;i++)
+    //     debug(i,solve(i));
+    scanf("%lld%lld",&a,&b);
+    //debug(solve(b),solve(a-1));
+    printf("%lld\n",solve(b)-solve(a-1));
+	return 0;
+}

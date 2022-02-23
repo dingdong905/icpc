@@ -1,0 +1,14 @@
+ll qpow(ll a, ll b, ll mod){
+	ll res = 1;
+	while (b > 0) {
+		if (b & 1)
+			res = res * a % mod;
+		b >>= 1;
+		a = a * a % mod;
+	}
+	return res;
+}
+
+ll inv(ll x, ll mod){
+	return qpow(x, mod - 2, mod);
+}

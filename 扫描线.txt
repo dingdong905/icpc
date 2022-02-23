@@ -1,0 +1,62 @@
+#include<bits/stdc++.h> 
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+const int N = 500005;
+int n;
+struct Seg {
+    ll l, r, h;
+    ll d;
+    Seg() {}
+    Seg(ll l, ll r, ll h, ll d) : l(l), r(r), h(h), d(d) {}
+    bool operator< (const Seg& rhs) const { return h < rhs.h; }
+} a[N];
+
+ll cnt[N << 2]; //根节点维护的是[l, r+1]的区间
+ll sum[N << 2], all[N];
+void push_up(int l, int r, int rt) {
+    if (cnt[rt]) sum[rt] = all[r + 1] - all[l];
+    else if (l == r) sum[rt] = 0; //leaves have no sons
+    else sum[rt] = sum[rt << 1] + sum[rt << 1 | 1];
+}
+
+void update(int L, int R, int v, int l, int r, int rt) {
+    if (L <= l && r <= R) {
+        cnt[rt] += v;
+        push_up(l, r, rt);
+        return;
+    }
+    int m = l + r >> 1;
+    if (L <= m) update(L, R, v, l, m, rt << 1);
+    if (R > m) update(L, R, v, m + 1, r, rt << 1 | 1);
+    push_up(l, r, rt);
+}
+
+int main() 
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; ++i) {
+        ll x1, y1, x2, y2;
+        scanf("%lld%lld%lld%lld", &x1, &y1, &x2, &y2);
+        a[i] = Seg(x1, x2, y1, 1);
+        a[i + n] = Seg(x1, x2, y2, -1);
+        all[i] = x1; all[i + n] = x2;
+    }
+    n <<= 1;
+    sort(a + 1, a + 1 + n);
+    sort(all + 1, all + 1 + n);
+    int m = unique(all + 1, all + 1 + n) - all - 1;
+    memset(cnt, 0, sizeof cnt);
+    memset(sum, 0, sizeof sum);
+    ll ans = 0;
+    for (int i = 1; i < n; ++i) {
+        int l = lower_bound(all + 1, all + 1 + m, a[i].l) - all;
+        int r = lower_bound(all + 1, all + 1 + m, a[i].r) - all;
+        if (l < r) update(l, r - 1, a[i].d, 1, m, 1);
+        ans += sum[1] * (a[i + 1].h - a[i].h);
+    }
+    printf("%lld\n", ans);
+    //printf("Test case #%d\nTotal explored area: %.2f\n\n", ++kase, ans);
+    return 0;
+}

@@ -1,0 +1,21 @@
+ll n, tree[2000010], input[2000010];
+ll lowbit(ll k)
+{
+    return k & -k;
+}
+void add(ll x, ll k) //树状数组添加结点 某个点x加上k   //建树的话调用这个
+{//(区间的话X - Y  add(X, k) add(Y + 1, -k)
+    while (x <= n){
+        tree[x] += k;
+        x += lowbit(x);
+    }
+}
+ll sum(ll x)  //第x个数的值
+{//(区间的话X - Y  sum(Y) - sum(X - 1)//区间用input[y]+sum(Y)查 input输入
+    ll ans = 0;
+    while (x != 0){
+        ans += tree[x];
+        x -= lowbit(x);
+    }
+    return ans;
+}

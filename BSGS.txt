@@ -1,0 +1,48 @@
+#include<bits/stdc++.h>
+#include<unordered_map>
+using namespace std;
+typedef long long ll;
+const ll INF = 0x3f3f3f3f3f3f3f3f;
+
+unordered_map<ll, ll>mp;
+
+ll qpow(ll a, ll b, ll mod) {
+    ll res = 1;
+    while (b) {
+        if (b & 1)
+            res = (1ll * res * a) % mod;
+        a = (1ll * a * a) % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+/*
+求 pow(a,x)=b(mod p)的最小非负整数解
+如果无解返回-1
+*/
+
+ll BSGS(ll a, ll b, ll mod) {
+    ll m = sqrt(mod) + 1, s = b;
+    for (ll i = 0; i < m; i++) {
+        mp[s] = i;
+        s = (1ll * s * a) % mod;
+    }
+    a = qpow(a, m, mod);
+    s = 1;
+    for (ll i = 0; i <= m; i++) {
+        ll j = mp.count(s) != 0 ? mp[s] : -1;
+        if (j != -1 && i * m - j >= 0)
+            return i * m - j;
+        s = (1ll * s * a) % mod;
+    }
+    return -1;
+}
+
+int main() {
+    ll p, b, n;
+    scanf("%lld%lld%lld", &p, &b, &n);
+    ll k = BSGS(b, n, p);
+    k != -1 ? printf("%lld\n", k) : puts("no solution");
+	return 0;
+}

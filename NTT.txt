@@ -1,0 +1,55 @@
+const ll MAXN=3*1e6+10,mod=998244353,G=3,Gi = 332748118; 
+ll N, M, limit = 1, L, r[MAXN];
+ll a[MAXN], b[MAXN];
+inline ll qpow(ll a, ll k) {
+	ll base = 1;
+	while(k) {
+		if(k & 1) 
+		    base = (base * a ) % mod;
+		a = (a * a) % mod;
+		k >>= 1;
+	}
+	return base % mod;
+}
+inline void NTT(ll *A, ll type) {
+	for(ll i = 0; i < limit; i++) 
+		if(i < r[i]) 
+		    swap(A[i], A[r[i]]);
+	for(ll mid = 1; mid < limit; mid <<= 1) {	
+		ll Wn = qpow(type == 1 ? G : Gi , (mod - 1) / (mid << 1));
+		for(ll j = 0; j < limit; j += (mid << 1)) {
+			ll w = 1;
+			for(ll k = 0; k < mid; k++, w = (w * Wn) % mod) {
+				ll x = A[j + k], y = w * A[j + k + mid] % mod;
+				A[j + k] = (x + y) % mod,
+				A[j + k + mid] = (x - y + mod) % mod;
+			}
+		}
+	}
+}
+int main() {
+	ll n,m;
+	cin>>N>>M;
+	for(ll i = 0; i <= N; i++) {
+	    cin>>a[i]; 
+		a[i]= (a[i] + mod) % mod;
+    }
+	for(ll i = 0; i <= M; i++) {
+		qin>>b[i];
+		b[i]=(b[i]+mod)%mod;
+	}
+	while(limit <= N + M) 
+	    limit <<= 1, L++;
+	for(ll i = 0; i < limit; i++)
+	    r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));	
+	NTT(a, 1);
+	NTT(b, 1);	
+	for(ll i = 0; i < limit; i++) 
+	    a[i] = (a[i] * b[i]) % mod;
+	NTT(a, -1);	
+	ll inv = qpow(limit, mod - 2);
+	for(ll i = 0; i <= N + M; i++)
+		cout<<(a[i] * inv) % mod<<" ";
+	cout<<endl;
+	return 0;
+}

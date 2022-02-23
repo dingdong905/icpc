@@ -1,0 +1,55 @@
+ll fa[200005];
+void init(ll n){
+    for (ll i = 0; i <= n; i++)
+        fa[i] = i;
+}
+
+ll find(ll x){
+    if (fa[x] == x)
+        return x;
+    else
+        return fa[x] = find(fa[x]);
+}
+
+void unite(ll x, ll y){ 
+    x = find(x);
+    y = find(y);
+    if (x == y)
+        return;
+    else
+        fa[y] = x;
+}
+int main()
+{
+    init(200000);
+    ll n, m;
+    scanf("%lld%lld", &n, &m);
+    for (ll i = 1; i <= m; i++) {
+        ll z, x, y;
+        scanf("%lld%lld%lld", &z, &x, &y);
+        if (z == 1)
+            unite(x, y);
+        else {
+            if (find(x) == find(y))
+                puts("Y");
+            else
+                puts("N");
+        }
+    }
+    return 0;
+}
+/**********************************/
+启发式合并
+void qfsunion(int x,int y)
+{
+    int a=find(x);
+    int b=find(y);
+    if(height[a]>height[b])
+        fa[b]=a;
+    else if(height[a]<height[b])
+        fa[a]=b;
+    else{
+        fa[a]=b;
+        height[b]++;
+    }
+}

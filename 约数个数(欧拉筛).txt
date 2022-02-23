@@ -1,0 +1,23 @@
+const ll MAXN = 1e6 + 5;
+ll dp[MAXN], sum[MAXN], d[MAXN], cnt, vis[MAXN], prim[MAXN], num[MAXN];
+void init(ll n) 
+{
+    d[1] = 1;
+    for (ll i = 2; i <= n; i++){
+        if (!vis[i]){
+            prim[cnt++] = i;
+            num[i] = 1;
+            d[i] = 2;
+        }
+        for (ll j = 0; j < cnt && i * prim[j] <= n; j++){
+            vis[i * prim[j]] = 1;
+            if (!(i % prim[j])){
+                num[i * prim[j]] = num[i] + 1;
+                d[i * prim[j]] = d[i] / (num[i] + 1) * (num[i * prim[j]] + 1);
+                break;
+            }
+            d[i * prim[j]] = d[i] * d[prim[j]];
+            num[i * prim[j]] = 1;
+        }
+    }
+}

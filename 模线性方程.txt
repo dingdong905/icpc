@@ -1,0 +1,38 @@
+ll exgcd(ll a, ll b, ll& x, ll& y)
+{
+    if (b == 0){
+        x = 1;
+        y = 0;
+        return a;
+    }
+    ll r = exgcd(b, a % b, x, y);
+    ll t = x;
+    x = y;
+    y = t - a / b * y;
+    return r;
+}
+ll gcd(ll a, ll b)
+{
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+void RemainderEquation(ll a, ll b, ll n)//a * res % n = b  
+{
+    ll X, Y, d;
+    ll res;
+    ll min_res;
+    d = gcd(a, n);
+    exgcd(a, n, X, Y);//a * x + n * y = gcd(a,n)
+    if (b % d == 0){
+        X = X * (b / d) % n;//得到同于方程一解
+        for (int i = 0; i < d; i++){
+            res = (X + (i * (n / d))) % n;
+            cout << res << endl;             //输出所有解
+        }
+        min_res = (X % (n / d) + (n / d)) % (n / d);
+        cout << min_res << endl;       //输出最小解
+    }
+    else
+        cout << "No solution" << endl;
+}

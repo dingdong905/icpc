@@ -1,0 +1,165 @@
+#include<bits/stdc++.h>
+using namespace std;
+#ifndef ONLINE_JUDGE
+#define debug(x...) do{cout<<"\033[33;1m "<<#x<<" -> ";err(x);}while (0)
+void err() {
+    cout<<"\033[39;0m"<<endl;
+}
+template<template<typename...> class T, typename t, typename... A>
+void err(T<t> a, A... x) {
+    for (auto v: a)
+        cout<<v<< ' ';
+    err(x...);
+}
+template<typename T, typename... A>
+void err(T a, A... x) {
+    cout<<a<<' ';
+    err(x...);
+}
+#else
+#define debug(...)
+#endif
+ 
+typedef long long ll;
+const int N=2100009;
+const ll mod=998244353,G=3;//G是mod的原根
+ll n,m;  // len(a),len(b);
+ll a[N],b[N];
+
+
+int bit,lim,r[N];//lim表示当前运算的长度
+ll ln[N],inv[N],tmp[N],diff[N],integral[N],sqr[N],quotient[N],remain[N],aa[N],bb[N],ex[N];//注意清空
+ll p[N],p1[N],Gi,_inv;//Gi是原根的逆元,_inv是lim的逆元
+
+ll qpow(ll a,ll b) {ll res=1;a%=mod;while(b) {if(b&1)res=res*a%mod;a=a*a%mod;b>>=1;}return res;}
+void poly_diff(ll n,ll *a) { //求导,模x^n,diff为导函数
+    memset(diff,0,sizeof(diff));
+    for(ll i=1; i<n; i++)diff[i-1]=a[i]*i%mod;
+    diff[n-1]=0;
+}
+void poly_integral(ll n,ll *a) { //积分,模x^n,integral为积分函数
+    memset(integral,0,sizeof(integral));
+    for(ll i=0; i<n-1; i++)integral[i+1]=a[i]*qpow(i+1,mod-2)%mod;
+    integral[0]=0;
+}
+void _init(ll n) { //n为多项式相乘可能最长的长度,只需初始化一次
+    Gi=qpow(G,mod-2);
+    for(ll i=1;i<n;i<<=1)p[i]=qpow(G,(mod-1)/(i<<1)),p1[i]=qpow(Gi,(mod-1)/(i<<1));
+}
+void init(ll n,ll m) { //n,m表示长度,每次运算调用一次
+    lim=1,bit=0;
+    while(lim<n+m-1)lim<<=1,bit++;
+    _inv=qpow(lim,mod-2);
+    for(ll i=0; i<lim; i++)r[i]=(r[i>>1]>>1)|((i&1)<<(bit-1));
+}
+void NTT(ll *a,ll type) {
+    for(int i=0; i<lim; i++)if(i<r[i])swap(a[i],a[r[i]]);
+    for(int mid=1; mid<lim; mid<<=1) {
+        ll W=(type==1?p[mid]:p1[mid]);
+        for(int r=mid<<1,j=0; j<lim; j+=r) {
+            ll e=1;
+            for(int k=0; k<mid; k++,e=e*W%mod) {
+                ll x=a[j+k],y=e*a[j+k+mid]%mod;
+                a[j+k]=(x+y)%mod,a[j+k+mid]=(x-y+mod)%mod;
+            }
+        }
+    }
+    if(type==-1)for(ll i=0;i<lim;i++)a[i]=a[i]*_inv%mod;
+}
+void poly_inv(ll n,ll *a) { //模x^n,a为原函数,inv存逆元
+    if(n==1) {
+        memset(inv,0,sizeof(inv));
+        memset(tmp,0,sizeof(tmp));
+        inv[0]=qpow(a[0],mod-2);
+        return ;
+    }
+    poly_inv((n+1)/2,a);
+    init(n,n);
+    for(ll i=0; i<n; i++)tmp[i]=a[i];
+    for(ll i=n; i<lim; i++)tmp[i]=0;
+    NTT(tmp,1),NTT(inv,1);
+    for(ll i=0; i<lim; i++)inv[i]=(2-tmp[i]*inv[i]%mod+mod)%mod*inv[i]%mod;
+    NTT(inv,-1);
+    for(ll i=n; i<lim; i++)inv[i]=0;
+}
+void poly_ln(ll n,ll *a) { //模x^n,a为原函数,ln存对数
+    memset(ln,0,sizeof(ln));
+    memset(tmp,0,sizeof(tmp));
+    poly_inv(n,a);
+    poly_diff(n,a);
+    init(n,n);
+    NTT(inv,1),NTT(diff,1);
+    for(ll i=0; i<lim; i++)tmp[i]=inv[i]*diff[i]%mod;
+    NTT(tmp,-1);
+    poly_integral(n,tmp);
+    for(ll i=0; i<n; i++)ln[i]=integral[i];
+}
+void poly_sqrt(ll n,ll *a) { //模x^n,a为原函数,sqr存开方
+    if(n==1) {
+        memset(tmp,0,sizeof(tmp));
+        memset(sqr,0,sizeof(sqr));
+        sqr[0]=1;//一般情况用二次剩余
+        return ;
+    }
+    poly_sqrt((n+1)/2,a);
+    poly_inv(n,sqr);
+    init(n,n);
+    for(ll i=0; i<n; i++)tmp[i]=a[i];
+    for(ll i=n; i<lim; i++)tmp[i]=0;
+    NTT(tmp,1),NTT(sqr,1),NTT(inv,1);
+    for(ll i=0; i<lim; i++)sqr[i]=(tmp[i]+sqr[i]*sqr[i]%mod)%mod*qpow(2,mod-2)%mod*inv[i]%mod;
+    NTT(sqr,-1);
+    for(ll i=n; i<lim; i++)sqr[i]=0;
+}
+void poly_exp(ll n,ll *a) { //模x^n,a为原函数,ex存指数
+    if(n==1) {
+        memset(ex,0,sizeof(ex));
+        memset(tmp,0,sizeof(tmp));
+        ex[0]=1;
+        return ;
+    }
+    poly_exp((n+1)/2,a);
+    poly_ln(n,ex);
+    init(n,n);
+    for(ll i=0; i<n; i++)tmp[i]=a[i];
+    for(ll i=n; i<lim; i++)tmp[i]=0;
+    tmp[0]=(1-ln[0]+tmp[0]+mod)%mod;
+    for(ll i=1; i<lim; i++)tmp[i]=(tmp[i]-ln[i]+mod)%mod;
+    NTT(ex,1),NTT(tmp,1);
+    for(ll i=0;i<lim;i++)ex[i]=ex[i]*tmp[i]%mod;
+    NTT(ex,-1);
+    for(ll i=n;i<lim;i++)ex[i]=0;
+}
+void poly_div(ll n,ll m,ll a[],ll b[]) { //a除以b,n为a的长度,m为b的长度,quotient存商,remain存余数
+    memset(quotient,0,sizeof(quotient));
+    memset(remain,0,sizeof(remain));
+    memset(tmp,0,sizeof(tmp));
+    for(ll i=0; i<n; i++)aa[i]=a[i];
+    for(ll i=0; i<m; i++)bb[i]=b[i];
+    for(ll i=0; i<=(n-1)/2; i++)swap(a[i],a[n-1-i]);
+    for(ll i=0; i<=(m-1)/2; i++)swap(b[i],b[m-1-i]);
+    poly_inv(n-m+1,b);
+    init(n-m+1,n-m+1);
+    for(ll i=n-m+1; i<lim; i++)a[i]=0;
+    NTT(a,1),NTT(inv,1);
+    for(ll i=0; i<lim; i++)quotient[i]=a[i]*inv[i]%mod;
+    NTT(quotient,-1),NTT(a,-1);
+    for(ll i=n-m+1; i<lim; i++)quotient[i]=0;
+    for(ll i=0; i<=(n-m)/2; i++)swap(quotient[i],quotient[n-m-i]);
+    init(n-m+1,m);
+    NTT(quotient,1),NTT(bb,1);
+    for(ll i=0; i<lim; i++)tmp[i]=quotient[i]*bb[i]%mod;
+    NTT(tmp,-1),NTT(quotient,-1);
+    for(ll i=0; i<n; i++)remain[i]=(aa[i]-tmp[i]+mod)%mod;
+}
+int main(){
+	_init(200005);
+	scanf("%lld",&n);
+	for(ll i=0;i<n;i++)
+		scanf("%lld",&a[i]);
+	poly_sqrt(n,a);
+	for(ll i=0;i<n;i++)
+		printf("%lld ",sqr[i]);
+	puts("");
+	return 0;
+}

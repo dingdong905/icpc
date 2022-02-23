@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+const ll INF = 0x3f3f3f3f3f3f3f3f;
+const int SIZE = 200005;
+ll fac[SIZE], mod;
+void init(ll n){
+	fac[0] = 1;
+	for (ll i = 1; i <= n; i++)
+		fac[i] = fac[i - 1] * i % mod;
+}
+
+ll qpow(ll a, ll b, ll mod){
+	ll res = 1;
+	while (b){
+		if (b & 1){
+			res = res * a % mod;
+		}
+		b >>= 1;
+		a = a * a % mod;
+	}
+	return res;
+}
+
+ll inv(ll x, ll mod){
+	return qpow(x, mod - 2, mod);
+}
+
+ll C(ll n, ll m, ll mod){
+	if (m > n || n < 0 || m < 0)
+		return 0;
+	if (n == m || m == 0)
+		return 1;
+	if (m > n - m)
+		m = n - m;
+	return fac[n] * inv(fac[m], mod) % mod * inv(fac[n - m], mod) % mod;
+}
+
+ll Lucas(ll n, ll m, ll mod){
+	if (!m)
+		return 1;
+	return C(n % mod, m % mod, mod) * Lucas(n / mod, m / mod, mod) % mod;
+}
+int main()
+{
+	ll t;
+	cin >> t;
+	while (t--)
+	{
+		ll n, m;
+		cin >> n >> m >> mod;
+		init(mod);
+		cout << Lucas(n + m, n, mod) << endl;
+	}
+	return 0;
+}
+
+递推
+C[1][0] = C[1][1] = 1;
+	for (int i = 2; i < N; i++){
+		C[i][0] = 1;
+		for (int j = 1; j < N; j++)
+			C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]);
+	}

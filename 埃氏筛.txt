@@ -1,0 +1,11 @@
+const int SIZE = 1000000;
+bool vis[SIZE + 1];//记录素数还是合数 0:素数  1:不是素数
+void aisi_prime(ll n)//埃氏筛 n表示范围
+{
+	memset(vis, 0, sizeof(vis));
+	vis[1] = 1;
+	for (ll i = 2; i <= sqrt(n); i++)
+		if (!vis[i])
+			for (ll j = i * i; j <= n; j += i)
+				vis[j] = 1;//被筛以后为合数
+}

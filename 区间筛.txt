@@ -1,0 +1,35 @@
+const int SIZE = 1000000;
+ll prime[SIZE + 1];
+ll Prime_area[SIZE + 1];
+bool Prime_swift[SIZE + 1];
+bool vis[SIZE + 1];
+void Euler_prime(ll n)
+{
+	for (ll i = 2; i <= n; i++){
+		if (!vis[i])
+			prime[++prime[0]] = i;
+		for (ll j = 1; j <= prime[0] && i * prime[j] <= n; j++){
+			vis[i * prime[j]] = 1;
+			if (i % prime[j] == 0)
+				break;
+		}
+	}
+}
+void area_prime(ll L, ll R)
+{
+	Euler_prime((ll)sqrt(R));
+	memset(Prime_area, 0, sizeof(Prime_area));
+	memset(Prime_swift, 0, sizeof(Prime_swift));
+	if (L == 1)
+		L = 2;
+	for (ll i = 1; i <= prime[0] && prime[i] * prime[i] <= R; i++)
+		for (ll j = max((ll)2, L / prime[i] + (L % prime[i] > 0)); j <= R / prime[i]; j++)
+			Prime_swift[prime[i] * j - L] = 1;
+	/*
+	* 填入素数表
+	*/
+	for (ll i = 0; i <= R - L; i++)
+		if (Prime_swift[i] == 0)
+			Prime_area[++Prime_area[0]] = i;
+			//cout << Prime_area[0] << ":" << i + L << endl;
+}

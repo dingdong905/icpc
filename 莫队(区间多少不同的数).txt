@@ -1,0 +1,82 @@
+#include<bits/stdc++.h>
+using namespace std;
+#ifndef ONLINE_JUDGE
+#define debug(x...) do{cout<<"\033[33;1m "<<#x<<" -> ";err(x);}while (0)
+void err() {
+    cout<<"\033[39;0m"<<endl;
+}
+template<template<typename...> class T, typename t, typename... A>
+void err(T<t> a, A... x) {
+    for (auto v: a)
+        cout<<v<< ' ';
+    err(x...);
+}
+template<typename T, typename... A>
+void err(T a, A... x) {
+    cout<<a<<' ';
+    err(x...);
+}
+#else
+#define debug(...)
+#endif
+typedef long long ll;
+const ll N=1e5+10;
+ll a[N<<1],n,m,vis[N],ans,block,num[N];
+struct node {
+    ll l, r, id;
+    bool operator<(const node &b) const {
+        if (l/block==b.l/block)
+            return r<b.r;
+        return l/block<b.l/block;
+    }
+}q[N];
+void add(ll x){
+    vis[a[x]]++;
+    if (vis[a[x]]==1)
+        ans++;
+}
+void del(ll x){
+    vis[a[x]]--;
+    if (vis[a[x]]==0)
+        ans--;
+}
+int main() {
+    while(scanf("%lld%lld",&n,&m)!=EOF){
+        block=sqrt(n<<1),ans=0;
+        memset(vis,0,sizeof(vis));
+        for(ll i=1;i<=n;i++){
+            scanf("%lld",&a[i]);
+            a[i+n]=a[i];
+        }
+        for(ll i=1;i<=m;i++){
+            ll l,r;
+            scanf("%lld%lld",&l,&r);
+            q[i].l=r,q[i].r=l+n,q[i].id=i;
+        }
+        sort(q+1,q+1+m);
+        ll l=1,r=0;
+        for (ll i=1;i<=m;i++) {
+            //debug(q[i].l,q[i].r);
+            while(l<q[i].l){
+                del(l);
+                l++;
+            }
+            while(l>q[i].l){
+                l--;
+                add(l);
+            }
+            while(r<q[i].r){
+                r++;
+                add(r);
+            }
+            while(r>q[i].r){
+                del(r);
+                r--;
+            }
+            num[q[i].id]=ans;
+        }
+        for(ll i=1;i<=m;i++)
+            printf("%lld\n",num[i]);
+    }
+    return 0;
+}

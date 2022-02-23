@@ -1,0 +1,38 @@
+const ll MAXN = 2e6 + 5;
+bool vis[MAXN];
+ll prime[MAXN], cnt, mu[MAXN], d[MAXN], num[MAXN], phi[MAXN];
+/*
+	prime[i]   第i个素数
+	mu[i]      莫比乌斯函数
+	phi[i]     欧拉函数
+	d[i]       i的约数数量
+*/
+
+[1,n-1]  与 n 互质的前缀和  n*phi(n)/2
+
+void Euler_seive(ll n) {
+	vis[1] = 1, cnt = 0, d[1] = 1, num[1] = 0, mu[1] = 1, phi[1] = 1;
+	for (ll i = 2; i <= n; i++) {
+		if (!vis[i]) {
+			mu[i] = -1;
+			d[i] = 2;
+			num[i] = 1;
+			prime[++cnt] = i;
+			phi[i] = i - 1;
+		}
+		for (ll j = 1; j <= cnt && i * prime[j] <= n; j++) {
+			vis[i * prime[j]] = true;
+			if (i % prime[j] == 0) {
+				mu[i * prime[j]] = 0;
+				num[i * prime[j]] = num[i] + 1;
+				d[i * prime[j]] = d[i] / (num[i] + 1) * (num[i] + 2);
+				phi[i * prime[j]] = phi[i] * prime[j];
+				break;
+			}
+			mu[i * prime[j]] = -mu[i];
+			num[i * prime[j]] = 1;
+			d[i * prime[j]] = d[i] * 2;
+			phi[i * prime[j]] = phi[i] * (prime[j] - 1);
+		}
+	}
+}

@@ -1,0 +1,20 @@
+//f[]：可以取走的石子个数
+//sg[]:0~n的SG函数值
+//hash[]:mex{}
+const int N = 1000005;
+ll f[N], sg[N], Hash[N];
+void getSG(ll n)
+{
+    memset(sg, 0, sizeof(sg));
+    for (ll i = 1; i <= n; i++){
+        memset(Hash, 0, sizeof(Hash));
+        for (ll j = 1; f[j] <= i; j++)
+            Hash[sg[i - f[j]]] = 1;
+        for (ll j = 0; j <= n; j++){    //求mes{}中未出现的最小的非负整数 
+            if (Hash[j] == 0){
+                sg[i] = j;
+                break;
+            }
+        }
+    }
+}

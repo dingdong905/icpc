@@ -1,0 +1,22 @@
+ll exgcd(ll a, ll b, ll& x, ll& y)
+{
+    if (b == 0){
+        x = 1;
+        y = 0;
+        return a;
+    }
+    ll r = exgcd(b, a % b, x, y);
+    ll t = x;
+    x = y;
+    y = t - a / b * y;
+    return r;
+}
+
+ll inv(ll a, ll mod)//扩展欧几里得求逆元
+{
+    ll x, y;
+    ll d = exgcd(a, mod, x, y);
+    if (d == 1)
+        return (x % mod + mod) % mod;
+    return -1;
+}

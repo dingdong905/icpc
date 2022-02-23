@@ -1,0 +1,54 @@
+/*
+给出 a,b,d求满足1≤x≤a,1≤y≤b，且gcd(x,y)=d 的二元组 (x,y)的数量。
+*/
+#include<bits/stdc++.h>
+#include<unordered_map>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+const ll INF = 0x3f3f3f3f3f3f3f3f;
+const ll MAXN = 5 * 1e4 + 5;
+
+ll mu[MAXN], sum[MAXN], prime[MAXN], vis[MAXN], cnt;
+
+void mobius(ll n)
+{
+	mu[1] = 1;
+	for (ll i = 2; i <= n; i++) {
+		if (!vis[i]) {
+			prime[++cnt] = i;
+			mu[i] = -1;
+		}
+		for (ll j = 1; j <= cnt && i * prime[j] <= n; j++) {
+			vis[i * prime[j]] = true;
+			mu[i * prime[j]] = -mu[i];
+			if (i % prime[j] == 0) {
+				mu[i * prime[j]] = 0;
+				break;
+			}
+		}
+	}
+	for (ll i = 1; i <= n; i++)
+		sum[i] = sum[i - 1] + mu[i];
+}
+
+int main()
+{
+	mobius(50000);
+	ll n;
+	scanf("%lld", &n);
+	for (ll i = 1; i <= n; i++) {
+		ll a, b, d, ans = 0;
+		scanf("%lld%lld%lld", &a, &b, &d);
+		if (a > b)
+			swap(a, b);
+		a /= d, b /= d;
+		for (ll l = 1, r = l; l <= a; l = r + 1) {
+			r = min(a / (a / l), b / (b / l));
+			//cout << l << " " << r << endl;
+			ans += (sum[r] - sum[l - 1]) * (a / l) * (b / l);
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

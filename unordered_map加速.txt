@@ -1,0 +1,22 @@
+const ll D = 1e7 + 9, T = 1e7;
+ll head[D], to[T], key[T], value[T], nex[T], tot;
+void add(ll x)  //mp[x]++;
+{
+    for (ll i = head[x % D]; i; i = nex[i])
+        if (key[i] == x){
+            ++value[i];
+            return;
+        }
+    ++tot;
+    key[tot] = x;
+    value[tot] = 1;
+    nex[tot] = head[x % D];
+    head[x % D] = tot;
+}
+ll Q(ll x)  //mp[x]的值
+{
+    for (ll i = head[x % D]; i; i = nex[i])
+        if (key[i] == x)
+            return value[i];
+    return 0;
+}

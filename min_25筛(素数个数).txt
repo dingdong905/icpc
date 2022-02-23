@@ -1,0 +1,56 @@
+typedef long long ll;
+const long long MAXN = 6893911;
+ll p[MAXN], cnt;
+bool mark[MAXN];
+ll pi[MAXN];
+void init()
+{
+    for (ll i = 2; i < MAXN; i++){
+        if (!mark[i])
+            p[cnt++] = i;
+        pi[i] = pi[i - 1] + !mark[i];
+        for (ll j = 0; p[j] * i < MAXN && j < cnt; j++){
+            mark[p[j] * i] = true;
+            if (i % p[j] == 0)
+                break;
+        }
+    }
+}
+
+ll f(ll n, ll m)
+{
+    if (n == 0)
+        return 0;
+    if (m == 0)
+        return n - n / 2;
+    return f(n, m - 1) - f(n / p[m], m - 1);
+}
+
+ll Pi(ll N);
+
+ll p2(ll n, ll m)
+{
+    ll ans = 0;
+    for (ll i = m + 1; p[i] * p[i] <= n; i++)
+        ans += Pi(n / p[i]) - Pi(p[i]) + 1;
+    return ans;
+}
+
+ll p3(ll n, ll m)
+{
+    ll ans = 0;
+    for (ll i = m + 1; p[i] * p[i] * p[i] <= n; i++)
+        ans += p2(n / p[i], i - 1);
+    return ans;
+}
+
+ll Pi(ll N)
+{
+    if (N < MAXN)
+        return pi[N];
+    ll lim = pow(N, 0.25) + 1;
+    ll i;
+    for (i = 0; p[i] <= lim; i++);
+    ll ans = i + f(N, i - 1) - 1 - p2(N, i - 1) - p3(N, i - 1);
+    return ans;
+}

@@ -1,0 +1,137 @@
+const int S = 8; //随机算法判定次数，一般8~10就够了
+// 计算ret = (a*b)%c a,b,c < 2^63
+ll mult_mod(ll a, ll b, ll c)
+{
+    a %= c;
+    b %= c;
+    ll ret = 0;
+    ll tmp = a;
+    while (b){
+        if (b & 1){
+            ret += tmp;
+            if (ret > c)
+                ret -= c;//直接取模慢很多
+        }
+        tmp <<= 1;
+        if (tmp > c)
+            tmp -= c;
+        b >>= 1;
+    }
+    return ret;
+}
+
+// 计算 ret = (a^n)%mod
+ll pow_mod(ll a, ll n, ll mod)
+{
+    ll ret = 1;
+    ll temp = a % mod;
+    while (n){
+        if (n & 1)
+            ret = mult_mod(ret, temp, mod);
+        temp = mult_mod(temp, temp, mod);
+        n >>= 1;
+    }
+    return ret;
+}
+// 通过 a^(n-1)=1(mod n)来判断n是不是素数
+// n-1 = x*2^t 中间使用二次判断
+// 是合数返回true, 不一定是合数返回false
+bool check(ll a, ll n, ll x, ll t)
+{
+    ll ret = pow_mod(a, x, n);
+    ll last = ret;
+    for (ll i = 1; i <= t; i++){
+        ret = mult_mod(ret, ret, n);
+        if (ret == 1 && last != 1 && last != n - 1)
+            return true;//合数
+        last = ret;
+    }
+    if (ret != 1)
+        return true;
+    else
+        return false;
+}
+//**************************************************
+// Miller_Rabin算法
+// 是素数返回true,(可能是伪素数)
+// 不是素数返回false
+//**************************************************
+bool Miller_Rabin(ll n)
+{
+    if (n < 2)
+        return false;
+    if (n == 2)
+        return true;
+    if ((n & 1) == 0)
+        return false;//偶数
+    ll x = n - 1;
+    ll t = 0;
+    while ((x & 1) == 0){
+        x >>= 1;
+        t++;
+    }
+    srand(time(NULL));/* *************** */
+    for (ll i = 0; i < S; i++){
+        ll a = rand() % (n - 1) + 1;
+        if (check(a, n, x, t))
+            return false;
+    }
+    return true;
+}
+//**********************************************
+// pollard_rho 算法进行质因素分解
+//
+//
+//*********************************************
+ll factor[100];//质因素分解结果（刚返回时时无序的）
+ll tol;//质因素的个数，编号0~tol-1
+ll gcd(ll a, ll b)
+{
+    ll t;
+    while (b){
+        t = a;
+        a = b;
+        b = t % b;
+    }
+    if (a >= 0)
+        return a;
+    else
+        return -a;
+}
+//找出一个因子
+ll pollard_rho(ll x, ll c)
+{
+    ll i = 1, k = 2;
+    srand(time(NULL));
+    ll x0 = rand() % (x - 1) + 1;
+    ll y = x0;
+    while (1){
+        i++;
+        x0 = (mult_mod(x0, x0, x) + c) % x;
+        ll d = gcd(y - x0, x);
+        if (d != 1 && d != x)
+            return d;
+        if (y == x0)
+            return x;
+        if (i == k){
+            y = x0;
+            k += k;
+        }
+    }
+}
+//对 n进行素因子分解，存入factor. k设置为107左右即可
+void findfac(ll n, ll k)
+{
+    if (n == 1)
+        return;
+    if (Miller_Rabin(n)) {
+        factor[tol++] = n;
+        return;
+    }
+    ll p = n;
+    ll c = k;
+    while (p >= n)
+        p = pollard_rho(p, c--);//值变化，防止死循环k
+    findfac(p, k);
+    findfac(n / p, k);
+}

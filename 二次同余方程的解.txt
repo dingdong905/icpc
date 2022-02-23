@@ -1,0 +1,107 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll INF = 0x3f3f3f3f3f3f3f3f;
+ll qpow(ll a, ll b, ll m){
+    ll ans = 1;
+    while (b) {
+        if (b & 1) {
+            ans = ans * a % m;
+            b--;
+        }
+        b >>= 1;
+        a = a * a % m;
+    }
+    return ans;
+}
+
+struct T{
+    ll p, d;
+    T(ll p = 0, ll d = 0) :p(p), d(d) {}
+};
+
+ll w;
+
+T multi_er(T a, T b, ll m){  //二次域乘法
+    T ans;
+    ans.p = (a.p * b.p % m + a.d * b.d % m * w % m) % m;
+    ans.d = (a.p * b.d % m + a.d * b.p % m) % m;
+    return ans;
+}
+
+T power(T a, ll b, ll m){  //二次域上快速幂
+    T ans;
+    ans.p = 1;
+    ans.d = 0;
+    while (b) {
+        if (b & 1) {
+            ans = multi_er(ans, a, m);
+            b--;
+        }
+        b >>= 1;
+        a = multi_er(a, a, m);
+    }
+    return ans;
+}
+
+ll Legendre(ll a, ll p){  //求勒让德符号
+    return qpow(a, (p - 1) >> 1, p);
+}
+
+ll Mod(ll a, ll m){  //取模操作
+    a %= m;
+    if (a < 0)
+        a += m;
+    return a;
+}
+
+/*
+* p 为奇质数
+* solve(n,p)   求解 x*x=N(modp)的解  
+* p = 2 时 仅有1解 恒为1
+* n = 0 时 仅有1解 为0
+* return -1 表示无解
+* return  key  表示其中一个正整数解    
+一般情况会有两个解   key 和 p-key
+*/
+
+ll Solve(ll n, ll p){
+    if (p == 2)
+        return 1;
+    if (Legendre(n, p) + 1 == p)
+        return -1;
+    ll a = -1, t;
+    while (true) {
+        a = rand() % p;
+        t = a * a - n;
+        w = Mod(t, p);
+        if (Legendre(w, p) + 1 == p)
+            break;
+    }
+    T tmp;
+    tmp.p = a;
+    tmp.d = 1;
+    T ans = power(tmp, (p + 1) >> 1, p);
+    return ans.p;
+}
+int main() {
+    ll T;
+    scanf("%lld", &T);
+    while (T--) {
+        ll N, p;
+        scanf("%lld%lld", &N, &p);
+        if (N == 0)    //n = 0 时 仅有1解 为0
+            puts("0");
+        else {
+            ll key = Solve(N, p);
+            if (key == -1)  // return -1 表示无解
+                puts("No root");
+            else if (p == 2)  //p = 2 时 仅有1解 恒为1
+                puts("1");
+            else   //return  key  表示其中一个正整数解    
+                   //一般情况会有两个解   key 和 p - key
+                printf("%lld %lld\n", min(key, p - key), max(key, p - key));
+        }
+    }
+    return 0;
+}

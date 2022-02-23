@@ -1,0 +1,33 @@
+const ll SIZE = 1000005;
+ll prime[SIZE + 1];
+bool vis[SIZE + 1];
+ll fac[100][2];
+ll primecnt = 0, faccnt = 0;
+void Euler_prime(ll n)
+{
+	for (ll i = 2; i <= n; i++){
+		if (!vis[i])
+			prime[++primecnt] = i;
+		for (ll j = 1; j <= primecnt && i * prime[j] <= n; j++){
+			vis[i * prime[j]] = 1;
+			if (i % prime[j] == 0)
+				break;
+		}
+	}
+}
+void factor(ll x)
+{
+	for (ll i = 1; i <= primecnt && prime[i] * prime[i] <= x; i++){
+		if (x % prime[i] == 0){
+			fac[++faccnt][0] = prime[i];
+			while (x % prime[i] == 0){
+				fac[faccnt][1]++;
+				x /= prime[i];
+			}
+		}
+	}
+	if (x != 1){
+		fac[++faccnt][0] = x;
+		fac[faccnt][1]++;
+	}
+}
